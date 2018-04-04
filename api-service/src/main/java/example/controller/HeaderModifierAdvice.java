@@ -24,10 +24,11 @@ public class HeaderModifierAdvice implements ResponseBodyAdvice<Object> {
     @PostConstruct
     public void init() {
         for (Map.Entry<String, String> entry : System.getenv().entrySet()) {
-            if (entry.getValue().startsWith(headersPrefix)) {
+            if (entry.getKey().toLowerCase().startsWith(headersPrefix)) {
                 headers.put(entry.getKey(), entry.getValue());
             }
         }
+        headers.put("HOSTNAME", System.getenv("HOSTNAME"));
     }
 
     @Override

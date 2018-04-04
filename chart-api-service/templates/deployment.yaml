@@ -1,3 +1,4 @@
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -25,6 +26,16 @@ spec:
           env:
               - name: SPRING_DATA_MONGODB_URI
                 value: 'mongodb://{{ .Values.mongodb.mongodbUsername }}:{{ .Values.mongodb.mongodbPassword }}@{{ .Release.Name }}-mongodb:27017/{{ .Values.mongodb.mongodbDatabase }}'
+              - name: APP_RELEASE_TIME
+                value: '{{.Release.Time.Seconds}}'
+              - name: APP_RELEASE_NAME
+                value: '{{.Release.Name}}'
+              - name: APP_RELEASE_REVISION
+                value: '{{.Release.Revision}}'
+              - name: APP_CHART_NAME
+                value: '{{.Chart.Name}}'
+              - name: APP_CHART_VERSION
+                value: '{{.Chart.Version}}'
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
