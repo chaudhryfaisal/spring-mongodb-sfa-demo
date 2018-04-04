@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "fic-demo-api-service.fullname" . }}
+  name: {{ template "api-service.fullname" . }}
   labels:
-    app: {{ template "fic-demo-api-service.name" . }}
-    chart: {{ template "fic-demo-api-service.chart" . }}
+    app: {{ template "api-service.name" . }}
+    chart: {{ template "api-service.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
@@ -14,5 +14,5 @@ spec:
       targetPort: {{ .Values.service.port }}
       protocol: TCP
   selector:
-    app: {{ template "fic-demo-api-service.name" . }}
+    app: {{ template "api-service.name" . }}
     release: {{ .Release.Name }}

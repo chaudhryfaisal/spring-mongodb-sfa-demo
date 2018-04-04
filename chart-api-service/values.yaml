@@ -1,4 +1,4 @@
-# Default values for fic-demo-api-service.
+# Default values for api-service.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -6,10 +6,8 @@ replicaCount: 1
 
 
 image:
-#  repository: artifactory.dev.mastercard.int:6555/mc-shcomp-af/fic-demo-api-service
-#  tag: 1.0.0
-  repository: chaudhryfaisal/api-service
-  tag: latest
+  repository: gcr.io/kubernetesengine/api-service
+  tag: master
 #  pullPolicy: IfNotPresent
   pullPolicy: Always
 
@@ -23,9 +21,9 @@ ingress:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/rewrite-target: /
-  path: /fic-demo-api-service
+  path: /api-service-helm/
   hosts:
-    - "ech-10-168-130-8"
+    - "sfa.demo.fic.com"
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:

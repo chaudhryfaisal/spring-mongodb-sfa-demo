@@ -1,5 +1,5 @@
 {{- if .Values.ingress.enabled -}}
-{{- $fullName := include "fic-demo-api-service.fullname" . -}}
+{{- $fullName := include "api-service.fullname" . -}}
 {{- $servicePort := .Values.service.port -}}
 {{- $ingressPath := .Values.ingress.path -}}
 apiVersion: extensions/v1beta1
@@ -7,8 +7,8 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}
   labels:
-    app: {{ template "fic-demo-api-service.name" . }}
-    chart: {{ template "fic-demo-api-service.chart" . }}
+    app: {{ template "api-service.name" . }}
+    chart: {{ template "api-service.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 {{- with .Values.ingress.annotations }}

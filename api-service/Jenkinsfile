@@ -108,7 +108,7 @@ podTemplate(label: podLabel,
 
                     container('kubectl') {
                         echo("deploying to ${deployNamespace}")
-                        sh("! kubectl get ns ${deployNamespace} > /dev/null  2>&1 || kubectl --namespace=${deployNamespace} apply -f ./k8s")
+                        sh("! kubectl get ns ${deployNamespace} > /dev/null  2>&1 || kubectl --namespace=${deployNamespace} apply -f ./$appName/k8s")
                     }
                 }
             }
