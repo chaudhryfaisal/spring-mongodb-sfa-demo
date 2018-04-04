@@ -1,0 +1,71 @@
+final def branch = "master" //TODO update from env
+final def appName = "api-service"
+final def chartName = "chart-$appName"
+final def releaseName = "$chartName-demo"
+
+final def BUCKET_NAME = "fic-demo1"
+final def HELM_CHART_REGISTRY="https://${BUCKET_NAME}.storage.googleapis.com/stable"
+final def STABLE_REPO_NAME="$BUCKET_NAME"
+
+final def podLabel = "${appName}-${branch}-${env.BUILD_NUMBER}"
+
+podTemplate(label: podLabel,
+    containers: [
+        containerTemplate(
+            name: 'jnlp',
+            image: 'huangminghuang/jnlp-slave-docker',
+            args:  '${computer.jnlpmac} ${computer.name}'
+        ),
+        containerTemplate(
+            name: 'kubectl',
+            image: 'lachlanevenson/k8s-kubectl:v1.7.10',
+            ttyEnabled: true,
+            command: 'cat'
+        ),
+        containerTemplate(
+            name: 'helm',
+            image: 'huangminghuang/helm:2.8.1',
+            ttyEnabled: true,
+            command: 'cat'
+        )
+    ],
+    volumes: [
+        hostPathVolume(
+            hostPath: '/var/run/docker.sock',
+            mountPath: '/var/run/docker.sock'
+        ),
+        hostPathVolume(
+            hostPath: '/usr/bin/docker',
+            mountPath: '/usr/bin/docker',
+        )
+    ]
+) {
+    node(podLabel) {
+
+        try {
+            stage('Deploy') {
+                    container('kubectl') {
+                        echo("creating kubeconfig")
+                        sh("KUBECONFIG=./kubeconfig kubectl config set-cluster mc --server=https://kubernetes.default --certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")
+                        sh("KUBECONFIG=./kubeconfig kubectl config set-context mc --cluster=mc")
+                        sh("KUBECONFIG=./kubeconfig kubectl config set-credentials user --token=\$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)")
+                        sh("KUBECONFIG=./kubeconfig kubectl config set-context mc --user=user")
+                        sh("KUBECONFIG=./kubeconfig kubectl config use-context mc")
+                    }
+
+                        container('helm') {
+                            echo("getting installs")
+                            sh "export KUBECONFIG=./kubeconfig"
+                            sh "helm init --client-only"
+                            sh "helm list"
+                            sh "helm repo add ${STABLE_REPO_NAME} ${HELM_CHART_REGISTRY}"
+                            sh "helm upgrade $releaseName -i $STABLE_REPO_NAME/$chartName"
+                        }
+            }
+
+        } catch (e) {
+            currentBuild.result = "FAILED"
+            throw e
+        }
+    }
+}
