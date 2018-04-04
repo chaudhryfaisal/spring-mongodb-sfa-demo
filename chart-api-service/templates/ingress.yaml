@@ -31,7 +31,7 @@ spec:
     - host: {{ . }}
       http:
         paths:
-          - path: {{ $fullName }}
+          - path: /{{ $fullName }}/
             backend:
               serviceName: {{ $fullName }}
               servicePort: {{ $servicePort }}
