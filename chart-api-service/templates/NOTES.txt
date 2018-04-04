@@ -1,13 +1,14 @@
+{{- $fullName := include "chart-api-service.fullname" . -}}
 1. Get the application URL by running these commands:
 {{- if .Values.ingress.enabled }}
 {{- range .Values.ingress.hosts }}
-  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}{{ template "chart-api-service.fullname" . }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}/{{ $fullName }}
 {{- end }}
 
   OR
 
     export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[1].address}")
-    export API_ENDPOINT=http://$NODE_IP/{{ template "chart-api-service.fullname" . }}
+    export API_ENDPOINT=http://$NODE_IP/{{ $fullName }}
     echo API_ENDPOINT=$API_ENDPOINT
 
     #Get Students
@@ -17,13 +18,13 @@
     curl -H "Content-Type: application/json" -X POST -d '{"id":"1","name":"Name","description":"Programmer","courses":[{"id":"1","name":"Minikube on local","description":"Kubenetes","steps":[1]}]}' $API_ENDPOINT/student
 
 {{- else if contains "NodePort" .Values.service.type }}
-  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ template "chart-api-service.fullname" . }})
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ $fullName }})
   export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
   echo http://$NODE_IP:$NODE_PORT
 {{- else if contains "LoadBalancer" .Values.service.type }}
      NOTE: It may take a few minutes for the LoadBalancer IP to be available.
-           You can watch the status of by running 'kubectl get svc -w {{ template "chart-api-service.fullname" . }}'
-  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ template "chart-api-service.fullname" . }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+           You can watch the status of by running 'kubectl get svc -w {{ $fullName }}'
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ $fullName }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
   echo http://$SERVICE_IP:{{ .Values.service.port }}
 {{- else if contains "ClusterIP" .Values.service.type }}
   export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app={{ template "chart-api-service.name" . }},release={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
@@ -32,6 +33,6 @@
 {{- end }}
 
 2. Pod commands
-    kubectl describe pod -l name={{ template "chart-api-service.fullname" . }}
-    kubectl logs -l name={{ template "chart-api-service.fullname" . }}
-    kubectl exec -it  $(kubectl get pod -l app={{ template "chart-api-service.fullname" . }} -o jsonpath="{.items[0].metadata.name}") ash
+    kubectl describe pod -l name={{ $fullName }}
+    kubectl logs -l name={{ $fullName }}
+    kubectl exec -it  $(kubectl get pod -l app={{ $fullName }} -o jsonpath="{.items[0].metadata.name}") ash
