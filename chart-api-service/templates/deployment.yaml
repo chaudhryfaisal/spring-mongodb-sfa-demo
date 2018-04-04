@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "api-service.fullname" . }}
+  name: {{ template "chart-api-service.fullname" . }}
   labels:
-    app: {{ template "api-service.name" . }}
-    chart: {{ template "api-service.chart" . }}
+    app: {{ template "chart-api-service.name" . }}
+    chart: {{ template "chart-api-service.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "api-service.name" . }}
+      app: {{ template "chart-api-service.name" . }}
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ template "api-service.name" . }}
+        app: {{ template "chart-api-service.name" . }}
         release: {{ .Release.Name }}
     spec:
       containers:
