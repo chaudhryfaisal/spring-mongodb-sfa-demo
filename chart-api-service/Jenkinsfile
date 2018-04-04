@@ -1,0 +1,9 @@
+
+def usptreamProjs = [
+    'api-service': 'master',
+]
+
+BuildHelmChart {
+  name='chart-api-service'
+  upstreams = usptreamProjs
+}
