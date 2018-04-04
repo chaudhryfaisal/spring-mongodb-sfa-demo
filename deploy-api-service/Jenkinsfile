@@ -2,6 +2,7 @@ final def branch = "master" //TODO update from env
 final def appName = "api-service"
 final def chartName = "chart-$appName"
 final def releaseName = "$chartName-demo"
+final def namespace = "released"
 
 final def BUCKET_NAME = "fic-demo1"
 final def HELM_CHART_REGISTRY="https://${BUCKET_NAME}.storage.googleapis.com/stable"
@@ -59,7 +60,7 @@ podTemplate(label: podLabel,
                             sh "helm init --client-only"
                             sh "helm list"
                             sh "helm repo add ${STABLE_REPO_NAME} ${HELM_CHART_REGISTRY}"
-                            sh "helm upgrade $releaseName -i $STABLE_REPO_NAME/$chartName"
+                            sh "helm upgrade $releaseName -i --namespace $namespace $STABLE_REPO_NAME/$chartName"
                         }
             }
 
