@@ -1,0 +1,12 @@
+.settings
+.project
+#Intellij
+.idea
+*.iml
+*.ipr
+
+# MongoDB
+data/db
+
+# Maven
+target/
