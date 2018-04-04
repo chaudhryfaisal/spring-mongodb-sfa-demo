@@ -1,5 +1,6 @@
 final def appName = "api-service"
 final def podLabel = "${appName}-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+final def branch = "master" /TODO update from env
 
 def notifyFailed() {
 //   slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
@@ -60,8 +61,8 @@ podTemplate(label: podLabel,
             final scmVars = checkout scm
 
             def imageTags = [
-                    "${env.DEFAULT_CONTAINER_REGISTRY}/${appName}:${env.BRANCH_NAME}",
-                    "${env.DEFAULT_CONTAINER_REGISTRY}/${appName}:${env.BRANCH_NAME}.${env.BUILD_NUMBER}",
+                    "${env.DEFAULT_CONTAINER_REGISTRY}/${appName}:${branch}",
+                    "${env.DEFAULT_CONTAINER_REGISTRY}/${appName}:${branch}.${env.BUILD_NUMBER}",
                     "${env.DEFAULT_CONTAINER_REGISTRY}/${appName}:${scmVars.GIT_COMMIT}"
                 ]
 
@@ -86,11 +87,8 @@ podTemplate(label: podLabel,
 
             stage('Deploy') {
                 def deployNamespace = ""
-                deployNamespace = "staging"
-                sh "env"
-                switch (env.BRANCH_NAME) {
+                switch (branch) {
                     case ["master"]:
-    //                case ["master","rysanekm-dev"]:
                         deployNamespace = "staging"
                         break
                     default:
