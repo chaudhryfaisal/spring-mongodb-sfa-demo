@@ -67,7 +67,7 @@ podTemplate(label: podLabel,
 
             stage('Test') {
                 container('maven') {
-                    sh("mvn clean package")
+                    sh("mvn clean package -q -f $appName")
                 }
             }
 
@@ -86,7 +86,8 @@ podTemplate(label: podLabel,
 
             stage('Deploy') {
                 def deployNamespace = ""
-
+                deployNamespace = "staging"
+                sh "env"
                 switch (env.BRANCH_NAME) {
                     case ["master"]:
     //                case ["master","rysanekm-dev"]:
