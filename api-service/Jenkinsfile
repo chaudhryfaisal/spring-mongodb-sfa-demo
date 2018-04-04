@@ -1,0 +1,132 @@
+final def appName = "api-service"
+final def podLabel = "${appName}-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+
+def notifyFailed() {
+//   slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+    if (env.CLUSTER_NAME == "jenkins") {
+        emailext (
+            subject: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+            body: """<p>FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+                <p>Check console output at "<a href="${env.BUILD_URL}">${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>"</p>""",
+            recipientProviders: [[$class: 'CulpritsRecipientProvider'],[$class: 'DevelopersRecipientProvider']]
+            )
+    }
+}
+
+podTemplate(label: podLabel,
+    containers: [
+        containerTemplate(
+            name: 'jnlp',
+            image: 'huangminghuang/jnlp-slave-docker',
+            args:  '${computer.jnlpmac} ${computer.name}'
+        ),
+        containerTemplate(
+            name: 'maven',
+            image: 'maven:3.5.2-jdk-8-alpine',
+            ttyEnabled: true,
+            command: 'cat'
+        ),
+        containerTemplate(
+            name: 'redis',
+            image: 'redis:3.2.11-alpine'
+        ),
+        containerTemplate(
+            name: 'gcloud',
+            image: 'google/cloud-sdk:178.0.0-alpine',
+            ttyEnabled: true,
+            command: 'cat'
+        ),
+        containerTemplate(
+            name: 'kubectl',
+            image: 'lachlanevenson/k8s-kubectl:v1.7.10',
+            ttyEnabled: true,
+            command: 'cat'
+        ),
+    ],
+    volumes: [
+        hostPathVolume(
+            hostPath: '/var/run/docker.sock',
+            mountPath: '/var/run/docker.sock'
+        ),
+        hostPathVolume(
+            hostPath: '/usr/bin/docker',
+            mountPath: '/usr/bin/docker',
+        )
+    ]
+) {
+    node(podLabel) {
+
+        try {
+            final scmVars = checkout scm
+
+            def imageTags = [
+                    "${env.DEFAULT_CONTAINER_REGISTRY}/${appName}:${env.BRANCH_NAME}",
+                    "${env.DEFAULT_CONTAINER_REGISTRY}/${appName}:${env.BRANCH_NAME}.${env.BUILD_NUMBER}",
+                    "${env.DEFAULT_CONTAINER_REGISTRY}/${appName}:${scmVars.GIT_COMMIT}"
+                ]
+
+            stage('Test') {
+                container('maven') {
+                    sh("mvn clean package")
+                }
+            }
+
+            stage('Build') {
+              docker.build("${appName}:${scmVars.GIT_COMMIT}",appName)
+            }
+
+            stage('Push') {
+                container('gcloud') {
+                    imageTags.each {
+                        sh("docker tag ${appName}:${scmVars.GIT_COMMIT} ${it}")
+                        sh("gcloud docker -- push ${it}")
+                    }
+                }
+            }
+
+            stage('Deploy') {
+                def deployNamespace = ""
+
+                switch (env.BRANCH_NAME) {
+                    case ["master"]:
+    //                case ["master","rysanekm-dev"]:
+                        deployNamespace = "staging"
+                        break
+                    default:
+                        echo("Skipping deploy. Not master.")
+                        // TODO: do something different. deploy to a different or unique namespace? only if tagged?
+                    }
+
+                if (deployNamespace != "") {
+                    container('kubectl') {
+                        echo("creating kubeconfig")
+                        sh("KUBECONFIG=./kubeconfig kubectl config set-cluster mc --server=https://kubernetes.default --certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")
+                        sh("KUBECONFIG=./kubeconfig kubectl config set-context mc --cluster=mc")
+                        sh("KUBECONFIG=./kubeconfig kubectl config set-credentials user --token=\$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)")
+                        sh("KUBECONFIG=./kubeconfig kubectl config set-context mc --user=user")
+                        sh("KUBECONFIG=./kubeconfig kubectl config use-context mc")
+                    }
+
+                    container('kubectl') {
+                        echo("deploying to ${deployNamespace}")
+                        sh("! kubectl get ns ${deployNamespace} > /dev/null  2>&1 || kubectl --namespace=${deployNamespace} apply -f ./k8s")
+                    }
+                }
+            }
+
+    //        stage('IntegrationTest') {
+    //            //get the integration script file from infrastructure
+    //            checkout([$class: 'GitSCM', branches: [[name: '*/rysanekm-dev']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'infrastructure-src']], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'BitBucketCheckout_Cred_ID', url: 'https://bitbucket.org/objectcomputing/infrastructure.git']]])
+    //            //#include it
+    //            infrastructureUtils = load ('infrastructure-src/utils/integration-test.groovy');
+    //            if ( infrastructureUtils.RunEndToEndTest ( env.CLUSTER_NAME ) == false ) {
+    //                currentBuild.result = 'FAILURE';
+    //            };
+    //        }
+        } catch (e) {
+            currentBuild.result = "FAILED"
+            notifyFailed()
+            throw e
+        }
+    }
+}
