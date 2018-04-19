@@ -4,6 +4,7 @@
 .idea
 *.iml
 *.ipr
+*.iws
 
 # MongoDB
 data/db

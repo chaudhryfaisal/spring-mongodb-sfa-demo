@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #echo 'GET http://sfa.demo.fic.com/chart-api-service-demo/' | \
 #    vegeta attack -rate 10 -duration 10m | vegeta dump 
 
