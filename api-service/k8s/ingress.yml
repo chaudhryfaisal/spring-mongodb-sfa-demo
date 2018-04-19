@@ -9,7 +9,8 @@ metadata:
 
 spec:
  rules:
- - http:
+ - host: 'sfa.demo.fic.com'
+   http:
      paths:
      - path: /api-service/
        backend:

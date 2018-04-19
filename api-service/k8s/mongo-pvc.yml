@@ -1,7 +1,7 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: mong-db-claim-1
+  name: mongo-pvc
 spec:
   accessModes:
     - ReadWriteOnce
