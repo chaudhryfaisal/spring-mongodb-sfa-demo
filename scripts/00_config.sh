@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #Kube config
-export KUBECONFIG=/Users/$(wmoai)/_Dev/_Proj/2018/kubernetes/code/k8/installer/clusters/fic-demo1/kube_config
+export KUBECONFIG=/Users/$(whoami)/_Dev/_Proj/2018/kubernetes/code/k8/installer/clusters/fic-demo1/kube_config
 
 #Helm setup
 BUCKET_NAME="fic-demo1"
