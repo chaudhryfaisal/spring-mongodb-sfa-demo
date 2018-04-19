@@ -1,9 +1,22 @@
 #!/usr/bin/env bash
 main(){
+    reset_helm
+    reset_ns
+}
+
+reset_helm(){
+    echo "reset_helm"
+    helm list | grep --color=none chart-api-service-demo | cut -f1 | xargs helm delete  --purge
+}
+
+reset_ns(){
+
+    echo "reset_ns"
     recreate_ns "staging"
     recreate_ns "released"
     sleep 5
     kubectl get ns
+
 }
 
 recreate_ns(){
