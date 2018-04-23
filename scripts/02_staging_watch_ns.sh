@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-watch -c -d -t 'kubectl get pods -n staging'
+watch -c -d 'kubectl get pods -n staging'

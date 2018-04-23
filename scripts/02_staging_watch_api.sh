@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-watch 'curl http://sfa.demo.fic.com/api-service/info'
+watch 'curl -s http://sfa.demo.fic.com/api-service/info'
