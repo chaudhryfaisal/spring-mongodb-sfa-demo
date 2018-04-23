@@ -8,8 +8,8 @@ replicaCount: 1
 image:
   repository: gcr.io/kubernetesengine/api-service
   tag: master
-#  pullPolicy: IfNotPresent
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
+#  pullPolicy: Always
 
 service:
   type: ClusterIP
