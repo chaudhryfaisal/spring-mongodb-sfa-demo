@@ -43,7 +43,7 @@ public class HeaderModifierAdvice implements ResponseBodyAdvice<Object> {
         headers.put(headersPrefix + "BUILD_TIME", buildTime);
         headers.put(headersPrefix + "BUILD_TAG", buildTag);
         headers.put(headersPrefix + "BUILD_BRANCH", buildBranch);
-        headers.put("HOSTNAME", System.getenv("HOSTNAME"));
+        headers.put(headersPrefix + "HOSTNAME", System.getenv("HOSTNAME"));
 
         for (Map.Entry<String, String> entry : System.getenv().entrySet()) {
             if (entry.getKey().toUpperCase().startsWith(headersPrefix)) {
