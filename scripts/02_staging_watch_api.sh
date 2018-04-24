@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-watch 'curl -s http://sfa.demo.fic.com/api-service/info'
+watch -c -d -t "curl -vs http://sfa.demo.fic.com/api-service/info 2>&1 | grep 'APP_' | sort"
