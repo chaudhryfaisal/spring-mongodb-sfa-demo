@@ -14,6 +14,7 @@ spec:
       containers:
       - name: api-service
         image: gcr.io/kubernetesengine/api-service:master
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
           protocol: TCP
